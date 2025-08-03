@@ -118,7 +118,7 @@ if [ ! -f "terraform.tfvars" ]; then
     
     read -p "Do you want to edit terraform.tfvars now? (y/n): " EDIT_VARS
     if [ "$EDIT_VARS" = "y" ] || [ "$EDIT_VARS" = "Y" ]; then
-        ${EDITOR:-nano} terraform.tfvars
+        ${EDITOR:-vim} terraform.tfvars
     fi
 else
     print_status "terraform.tfvars already exists"

@@ -63,7 +63,7 @@ cd Terraform-Demo
 cp terraform.tfvars.example terraform.tfvars
 
 # Edit terraform.tfvars with your values
-nano terraform.tfvars
+vim terraform.tfvars
 ```
 
 ### Step 2: Update Backend Configuration
