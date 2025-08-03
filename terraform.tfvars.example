@@ -1,0 +1,26 @@
+# AWS Configuration
+aws_region   = "us-east-1"
+project_name = "terraform-demo"
+environment  = "dev"
+
+# Network Configuration
+vpc_cidr           = "10.0.0.0/16"
+enable_nat_gateway = true
+
+# ACM Configuration (Set to true if you have a domain)
+enable_acm  = false
+domain_name = ""  # e.g., "example.com"
+
+# Compute Configuration
+instance_type    = "t3.micro"
+min_size         = 2
+max_size         = 6
+desired_capacity = 2
+
+# Database Configuration
+db_instance_class = "db.t3.micro"
+db_name          = "appdb"
+db_username      = "admin"
+
+# Jenkins Configuration
+jenkins_instance_type = "t3.medium"
