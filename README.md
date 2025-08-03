@@ -102,20 +102,21 @@ aws sts get-caller-identity --profile production
 aws sts get-caller-identity --profile development
 ```
 
-### Step 4: Deploy Multi-Account Infrastructure
+### Step 4: Choose Your Deployment Strategy
+
+**📋 Quick Decision:**
+- **Enterprise/Compliance**: Use [Multi-Account Deployment](MULTI-ACCOUNT-DEPLOYMENT.md)
+- **Cost-Optimized/Startup**: Use [Single-Account Deployment](SINGLE-ACCOUNT-DEPLOYMENT.md)
+- **Comparison**: See [Deployment Comparison](DEPLOYMENT-COMPARISON.md)
 
 ```bash
-# Option 1: Automated deployment (Recommended)
+# Multi-Account Deployment
 ./deploy-production.sh
+make deploy-devops && make deploy-production
 
-# Option 2: Manual account-by-account
-make deploy-devops      # Deploy DevOps account first
-make deploy-production  # Deploy Production account
-make deploy-development # Deploy Development account
-
-# Option 3: Individual account deployment
-terraform workspace new devops
-terraform apply -var-file="environments/accounts/devops.tfvars"
+# Single-Account Deployment
+make deploy-single-account
+terraform apply -var-file="environments/accounts/single-account.tfvars"
 ```
 
 ### Step 4: Access Your Resources
