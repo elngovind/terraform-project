@@ -101,6 +101,15 @@ deploy-development: plan-development ## Deploy Development account
 deploy-all-accounts: ## Deploy all accounts in sequence
 	@./deploy-production.sh
 
+# Single-account deployment
+plan-single-account: ## Create plan for single-account deployment
+	@echo "Creating plan for single-account deployment..."
+	@terraform plan -var-file="environments/accounts/single-account.tfvars" -out=tfplan-single-account
+
+deploy-single-account: plan-single-account ## Deploy single-account with separate VPCs
+	@echo "Deploying single-account infrastructure with separate VPCs..."
+	@terraform apply tfplan-single-account
+
 # Destruction
 destroy: ## Destroy infrastructure
 	@echo "Destroying $(ENV) environment..."

@@ -67,17 +67,29 @@ module "database" {
   db_username           = var.db_username
 }
 
-# Jenkins Module (Conditional - only in DevOps account)
+# Jenkins Module (Conditional - DevOps account or single-account mode)
 module "jenkins" {
   count  = var.deploy_jenkins ? 1 : 0
   source = "./modules/jenkins"
 
-  web_subnet_ids             = module.networking.web_subnet_ids
+  web_subnet_ids             = var.deploy_devops_vpc ? module.devops_vpc[0].devops_web_subnet_ids : module.networking.web_subnet_ids
   jenkins_security_group_id  = module.security.jenkins_security_group_id
   ec2_instance_profile_name  = module.security.ec2_instance_profile_name
   project_name               = var.project_name
   environment                = var.environment
   jenkins_instance_type      = var.jenkins_instance_type
+}
+
+# DevOps VPC Module (Conditional - only in single-account mode)
+module "devops_vpc" {
+  count  = var.deploy_devops_vpc ? 1 : 0
+  source = "./modules/devops-vpc"
+
+  project_name             = var.project_name
+  environment              = var.environment
+  devops_vpc_cidr          = var.devops_vpc_cidr
+  devops_web_subnet_cidrs  = var.devops_web_subnet_cidrs
+  devops_app_subnet_cidrs  = var.devops_app_subnet_cidrs
 }
 
 # Cross-Account Module

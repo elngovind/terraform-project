@@ -74,6 +74,17 @@ output "ec2_instance_profile_name" {
   value       = module.security.ec2_instance_profile_name
 }
 
+# DevOps VPC Outputs (Conditional)
+output "devops_vpc_id" {
+  description = "ID of the DevOps VPC"
+  value       = var.deploy_devops_vpc ? module.devops_vpc[0].devops_vpc_id : "N/A"
+}
+
+output "devops_vpc_cidr" {
+  description = "CIDR block of the DevOps VPC"
+  value       = var.deploy_devops_vpc ? module.devops_vpc[0].devops_vpc_cidr_block : "N/A"
+}
+
 # Cross-Account Outputs
 output "cross_account_role_arn" {
   description = "ARN of the cross-account deployment role"
@@ -84,12 +95,14 @@ output "cross_account_role_arn" {
 output "deployment_info" {
   description = "Important deployment information"
   value = {
+    deployment_mode    = var.deployment_mode
     account_type       = var.account_type
     application_url    = var.enable_acm ? "https://${var.domain_name}" : "http://${module.compute.alb_dns_name}"
     jenkins_url        = var.deploy_jenkins ? module.jenkins[0].jenkins_url : "Jenkins not deployed"
     database_endpoint  = module.database.db_instance_endpoint
     environment        = var.environment
     region            = var.aws_region
-    vpc_cidr          = var.vpc_cidr
+    production_vpc_cidr = var.vpc_cidr
+    devops_vpc_cidr    = var.deploy_devops_vpc ? var.devops_vpc_cidr : "N/A"
   }
 }

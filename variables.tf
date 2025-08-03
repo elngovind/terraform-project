@@ -89,6 +89,53 @@ variable "production_vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
+variable "deployment_mode" {
+  description = "Deployment mode (multi-account or single-account)"
+  type        = string
+  default     = "multi-account"
+  
+  validation {
+    condition     = contains(["multi-account", "single-account"], var.deployment_mode)
+    error_message = "Deployment mode must be multi-account or single-account."
+  }
+}
+
+variable "deploy_devops_vpc" {
+  description = "Deploy separate DevOps VPC in single-account mode"
+  type        = bool
+  default     = false
+}
+
+variable "devops_vpc_cidr" {
+  description = "DevOps VPC CIDR for single-account deployment"
+  type        = string
+  default     = "10.100.0.0/16"
+}
+
+variable "devops_web_subnet_cidrs" {
+  description = "CIDR blocks for DevOps web subnets"
+  type        = list(string)
+  default     = ["10.100.1.0/24", "10.100.2.0/24"]
+}
+
+variable "devops_app_subnet_cidrs" {
+  description = "CIDR blocks for DevOps app subnets"
+  type        = list(string)
+  default     = ["10.100.11.0/24", "10.100.12.0/24"]
+}
+
+variable "devops_db_subnet_cidrs" {
+  description = "CIDR blocks for DevOps database subnets"
+  type        = list(string)
+  default     = ["10.100.21.0/24", "10.100.22.0/24"]
+}
+
+variable "enable_vpc_peering" {
+  description = "Enable VPC peering between Production and DevOps VPCs"
+  type        = bool
+  default     = false
+}
+
 variable "enable_nat_gateway" {
   description = "Enable NAT Gateway for private subnets"
   type        = bool

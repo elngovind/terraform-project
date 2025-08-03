@@ -25,10 +25,14 @@ Development Account (10.10.0.0/16)
 ```
 
 **Security Model:**
-- Cross-account IAM roles for deployment
+- Cross-account IAM roles for deployment (multi-account)
 - Network isolation with separate VPCs
-- Jenkins in DevOps account deploys to Production
+- Jenkins in DevOps account/VPC deploys to Production
 - Least privilege access principles
+
+**Deployment Options:**
+- **Multi-Account**: Separate AWS accounts for maximum isolation
+- **Single-Account**: Separate VPCs within same account for cost optimization
 
 ### 🏗️ Infrastructure Components
 
@@ -127,14 +131,14 @@ After deployment, Terraform will output:
 ### Account-Specific Deployments
 
 ```bash
-# DevOps Account (Jenkins, CI/CD tools)
-terraform apply -var-file="environments/accounts/devops.tfvars"
+# Multi-Account Deployment
+terraform apply -var-file="environments/accounts/devops.tfvars"      # DevOps Account
+terraform apply -var-file="environments/accounts/production.tfvars"  # Production Account
+terraform apply -var-file="environments/accounts/development.tfvars" # Development Account
 
-# Production Account (Application workloads)
-terraform apply -var-file="environments/accounts/production.tfvars"
-
-# Development Account (Development environment)
-terraform apply -var-file="environments/accounts/development.tfvars"
+# Single-Account Deployment (Separate VPCs)
+make deploy-single-account  # Deploy both Production and DevOps in same account
+terraform apply -var-file="environments/accounts/single-account.tfvars"
 ```
 
 ### Environment-Specific Deployments
@@ -176,8 +180,11 @@ make deploy-region REGION=ap-southeast-1
 | `web_subnet_cidrs` | Web tier subnet CIDRs | `["10.0.1.0/24", "10.0.2.0/24"]` |
 | `app_subnet_cidrs` | App tier subnet CIDRs | `["10.0.11.0/24", "10.0.12.0/24"]` |
 | `db_subnet_cidrs` | Database tier subnet CIDRs | `["10.0.21.0/24", "10.0.22.0/24"]` |
+| `deployment_mode` | Deployment mode (multi-account/single-account) | `multi-account` |
 | `deploy_jenkins` | Deploy Jenkins server | `false` |
+| `deploy_devops_vpc` | Deploy separate DevOps VPC (single-account) | `false` |
 | `devops_account_id` | DevOps account ID for cross-account access | `""` |
+| `devops_vpc_cidr` | DevOps VPC CIDR (single-account mode) | `10.100.0.0/16` |
 | `enable_acm` | Enable SSL certificate | `false` |
 | `instance_type` | EC2 instance type | `t3.micro` |
 | `db_instance_class` | RDS instance class | `db.t3.micro` |
@@ -225,7 +232,8 @@ This project works in all major AWS regions:
 │   ├── accounts/          # Account-specific configs
 │   │   ├── production.tfvars  # Production account
 │   │   ├── devops.tfvars      # DevOps account
-│   │   └── development.tfvars # Development account
+│   │   ├── development.tfvars # Development account
+│   │   └── single-account.tfvars # Single account with separate VPCs
 │   ├── regions/           # Region-specific configs
 │   │   ├── us-west-2.tfvars
 │   │   ├── eu-west-1.tfvars
@@ -239,7 +247,8 @@ This project works in all major AWS regions:
     ├── database/          # RDS configuration
     ├── jenkins/           # Jenkins server setup
     ├── acm/              # SSL certificate management
-    └── cross-account/     # Cross-account IAM roles
+    ├── cross-account/     # Cross-account IAM roles
+    └── devops-vpc/        # DevOps VPC for single-account mode
 ```
 
 ## 🔐 Security Best Practices
