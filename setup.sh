@@ -113,6 +113,8 @@ if [ ! -f "terraform.tfvars" ]; then
     # Update region in tfvars
     sed -i.bak "s/us-east-1/$AWS_REGION/g" terraform.tfvars
     
+    print_status "Configuration updated for region: $AWS_REGION"
+    
     print_status "terraform.tfvars created. Please review and modify as needed."
     print_warning "Important: Review terraform.tfvars file before proceeding!"
     
@@ -210,3 +212,8 @@ echo ""
 echo "Environment-specific deployments:"
 echo "  terraform apply -var-file='environments/dev.tfvars'"
 echo "  terraform apply -var-file='environments/prod.tfvars'"
+echo ""
+echo "Region-specific deployments:"
+echo "  make deploy-region REGION=us-west-2"
+echo "  make deploy-region REGION=eu-west-1"
+echo "  make deploy-region REGION=ap-southeast-1"

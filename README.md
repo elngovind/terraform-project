@@ -113,6 +113,22 @@ terraform apply -var-file="environments/dev.tfvars"
 terraform apply -var-file="environments/prod.tfvars"
 ```
 
+### Multi-Region Deployments
+
+```bash
+# Deploy to US West 2
+make deploy-region REGION=us-west-2
+
+# Deploy to EU West 1
+make deploy-region REGION=eu-west-1
+
+# Deploy to AP Southeast 1
+make deploy-region REGION=ap-southeast-1
+
+# Manual deployment to any region
+terraform apply -var-file="environments/regions/REGION.tfvars"
+```
+
 ### Enable HTTPS with ACM
 
 1. Set `enable_acm = true` in your `.tfvars` file
@@ -128,6 +144,14 @@ terraform apply -var-file="environments/prod.tfvars"
 | `enable_acm` | Enable SSL certificate | `false` |
 | `instance_type` | EC2 instance type | `t3.micro` |
 | `db_instance_class` | RDS instance class | `db.t3.micro` |
+
+### Supported AWS Regions
+
+This project works in all major AWS regions:
+- **US**: us-east-1, us-east-2, us-west-1, us-west-2
+- **EU**: eu-west-1, eu-west-2, eu-west-3, eu-central-1, eu-north-1
+- **Asia Pacific**: ap-southeast-1, ap-southeast-2, ap-northeast-1, ap-northeast-2, ap-south-1
+- **Other**: ca-central-1, sa-east-1
 
 ## 🏛️ Terraform Features Demonstrated
 

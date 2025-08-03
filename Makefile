@@ -2,8 +2,9 @@
 
 .PHONY: help init plan apply destroy clean validate format check
 
-# Default environment
+# Default environment and region
 ENV ?= dev
+REGION ?= us-east-1
 
 # Help target
 help: ## Show this help message
@@ -54,6 +55,21 @@ deploy: plan apply ## Plan and apply in one command
 deploy-dev: plan-dev apply-dev ## Deploy development environment
 
 deploy-prod: plan-prod apply-prod ## Deploy production environment
+
+# Region-specific deployments
+plan-region: ## Create plan for specific region (usage: make plan-region REGION=us-west-2)
+	@echo "Creating plan for $(REGION) region..."
+	@terraform plan -var-file="environments/regions/$(REGION).tfvars" -out=tfplan-$(REGION)
+
+apply-region: ## Apply plan for specific region
+	@echo "Applying plan for $(REGION) region..."
+	@terraform apply tfplan-$(REGION)
+
+deploy-region: plan-region apply-region ## Deploy to specific region
+
+destroy-region: ## Destroy infrastructure in specific region
+	@echo "Destroying $(REGION) region infrastructure..."
+	@terraform destroy -var-file="environments/regions/$(REGION).tfvars"
 
 # Destruction
 destroy: ## Destroy infrastructure
