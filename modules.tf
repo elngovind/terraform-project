@@ -6,6 +6,9 @@ module "networking" {
   project_name       = var.project_name
   environment        = var.environment
   enable_nat_gateway = var.enable_nat_gateway
+  web_subnet_cidrs   = var.web_subnet_cidrs
+  app_subnet_cidrs   = var.app_subnet_cidrs
+  db_subnet_cidrs    = var.db_subnet_cidrs
 }
 
 # Security Module
@@ -64,8 +67,9 @@ module "database" {
   db_username           = var.db_username
 }
 
-# Jenkins Module
+# Jenkins Module (Conditional - only in DevOps account)
 module "jenkins" {
+  count  = var.deploy_jenkins ? 1 : 0
   source = "./modules/jenkins"
 
   web_subnet_ids             = module.networking.web_subnet_ids
@@ -74,4 +78,15 @@ module "jenkins" {
   project_name               = var.project_name
   environment                = var.environment
   jenkins_instance_type      = var.jenkins_instance_type
+}
+
+# Cross-Account Module
+module "cross_account" {
+  source = "./modules/cross-account"
+
+  account_type          = var.account_type
+  project_name          = var.project_name
+  environment           = var.environment
+  devops_account_id     = var.devops_account_id
+  production_account_id = var.production_account_id
 }

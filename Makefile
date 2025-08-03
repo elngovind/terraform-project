@@ -71,6 +71,36 @@ destroy-region: ## Destroy infrastructure in specific region
 	@echo "Destroying $(REGION) region infrastructure..."
 	@terraform destroy -var-file="environments/regions/$(REGION).tfvars"
 
+# Account-specific deployments
+plan-devops: ## Create plan for DevOps account
+	@echo "Creating plan for DevOps account..."
+	@terraform workspace select devops || terraform workspace new devops
+	@terraform plan -var-file="environments/accounts/devops.tfvars" -out=tfplan-devops
+
+plan-production: ## Create plan for Production account
+	@echo "Creating plan for Production account..."
+	@terraform workspace select production || terraform workspace new production
+	@terraform plan -var-file="environments/accounts/production.tfvars" -out=tfplan-production
+
+plan-development: ## Create plan for Development account
+	@echo "Creating plan for Development account..."
+	@terraform workspace select development || terraform workspace new development
+	@terraform plan -var-file="environments/accounts/development.tfvars" -out=tfplan-development
+
+deploy-devops: plan-devops ## Deploy DevOps account
+	@terraform apply tfplan-devops
+
+deploy-production: plan-production ## Deploy Production account
+	@echo "⚠️  DEPLOYING TO PRODUCTION ⚠️"
+	@read -p "Are you sure? (yes/no): " confirm && [ "$$confirm" = "yes" ]
+	@terraform apply tfplan-production
+
+deploy-development: plan-development ## Deploy Development account
+	@terraform apply tfplan-development
+
+deploy-all-accounts: ## Deploy all accounts in sequence
+	@./deploy-production.sh
+
 # Destruction
 destroy: ## Destroy infrastructure
 	@echo "Destroying $(ENV) environment..."

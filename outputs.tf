@@ -41,20 +41,20 @@ output "database_secrets_arn" {
   value       = module.database.secrets_manager_secret_arn
 }
 
-# Jenkins Outputs
+# Jenkins Outputs (Conditional)
 output "jenkins_url" {
   description = "Jenkins server URL"
-  value       = module.jenkins.jenkins_url
+  value       = var.deploy_jenkins ? module.jenkins[0].jenkins_url : "Jenkins not deployed in this account"
 }
 
 output "jenkins_public_ip" {
   description = "Jenkins server public IP"
-  value       = module.jenkins.jenkins_public_ip
+  value       = var.deploy_jenkins ? module.jenkins[0].jenkins_public_ip : "N/A"
 }
 
 output "jenkins_ssh_command" {
   description = "SSH command to connect to Jenkins server"
-  value       = module.jenkins.jenkins_ssh_command
+  value       = var.deploy_jenkins ? module.jenkins[0].jenkins_ssh_command : "N/A"
 }
 
 # ACM Outputs (conditional)
@@ -74,15 +74,22 @@ output "ec2_instance_profile_name" {
   value       = module.security.ec2_instance_profile_name
 }
 
+# Cross-Account Outputs
+output "cross_account_role_arn" {
+  description = "ARN of the cross-account deployment role"
+  value       = module.cross_account.cross_account_role_arn
+}
+
 # Deployment Information
 output "deployment_info" {
   description = "Important deployment information"
   value = {
+    account_type       = var.account_type
     application_url    = var.enable_acm ? "https://${var.domain_name}" : "http://${module.compute.alb_dns_name}"
-    jenkins_url        = module.jenkins.jenkins_url
+    jenkins_url        = var.deploy_jenkins ? module.jenkins[0].jenkins_url : "Jenkins not deployed"
     database_endpoint  = module.database.db_instance_endpoint
     environment        = var.environment
     region            = var.aws_region
-    state_bucket      = "terraform-state-demo-2025"  # Update with your actual bucket name
+    vpc_cidr          = var.vpc_cidr
   }
 }

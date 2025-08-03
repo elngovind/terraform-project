@@ -24,6 +24,71 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
+variable "account_type" {
+  description = "Type of AWS account (production, devops, development)"
+  type        = string
+  default     = "development"
+  
+  validation {
+    condition     = contains(["production", "devops", "development"], var.account_type)
+    error_message = "Account type must be production, devops, or development."
+  }
+}
+
+variable "account_id" {
+  description = "AWS Account ID"
+  type        = string
+  default     = ""
+}
+
+variable "web_subnet_cidrs" {
+  description = "CIDR blocks for web subnets"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "app_subnet_cidrs" {
+  description = "CIDR blocks for app subnets"
+  type        = list(string)
+  default     = ["10.0.11.0/24", "10.0.12.0/24"]
+}
+
+variable "db_subnet_cidrs" {
+  description = "CIDR blocks for database subnets"
+  type        = list(string)
+  default     = ["10.0.21.0/24", "10.0.22.0/24"]
+}
+
+variable "deploy_jenkins" {
+  description = "Deploy Jenkins server"
+  type        = bool
+  default     = false
+}
+
+variable "devops_account_id" {
+  description = "DevOps AWS Account ID for cross-account access"
+  type        = string
+  default     = ""
+}
+
+variable "production_account_id" {
+  description = "Production AWS Account ID for cross-account access"
+  type        = string
+  default     = ""
+}
+
+variable "devops_vpc_cidr" {
+  description = "DevOps VPC CIDR for peering"
+  type        = string
+  default     = "10.100.0.0/16"
+}
+
+variable "production_vpc_cidr" {
+  description = "Production VPC CIDR for peering"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
 variable "enable_nat_gateway" {
   description = "Enable NAT Gateway for private subnets"
   type        = bool

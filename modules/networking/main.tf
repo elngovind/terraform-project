@@ -20,10 +20,10 @@ resource "aws_internet_gateway" "main" {
 
 # Public Subnets (Web Tier)
 resource "aws_subnet" "web" {
-  count = 2
+  count = length(var.web_subnet_cidrs)
 
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
+  cidr_block              = var.web_subnet_cidrs[count.index]
   availability_zone       = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
   map_public_ip_on_launch = true
 
@@ -36,10 +36,10 @@ resource "aws_subnet" "web" {
 
 # Private Subnets (App Tier)
 resource "aws_subnet" "app" {
-  count = 2
+  count = length(var.app_subnet_cidrs)
 
   vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + 10)
+  cidr_block        = var.app_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
 
   tags = {
@@ -51,10 +51,10 @@ resource "aws_subnet" "app" {
 
 # Private Subnets (DB Tier)
 resource "aws_subnet" "db" {
-  count = 2
+  count = length(var.db_subnet_cidrs)
 
   vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + 20)
+  cidr_block        = var.db_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
 
   tags = {

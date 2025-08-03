@@ -45,13 +45,28 @@ This project creates a complete AWS infrastructure using Terraform with the foll
    - Pre-configured with CI/CD tools
    - CloudWatch logging
 
+## 🏭 Production Architecture
+
+### Multi-Account Strategy
+
+**Account Structure:**
+- **Production Account**: Application workloads (VPC: 10.0.0.0/16)
+- **DevOps Account**: CI/CD tools, Jenkins (VPC: 10.100.0.0/16)
+- **Development Account**: Development environment (VPC: 10.10.0.0/16)
+
+**Security:**
+- Cross-account IAM roles for deployment
+- Separate VPCs with controlled access
+- Jenkins in DevOps account deploys to Production
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-1. **AWS CLI configured** with appropriate permissions
-2. **Terraform >= 1.9.0** installed
-3. **S3 bucket** for state storage (update bucket name in `main.tf`)
+1. **Multiple AWS Accounts** (Production, DevOps, Development)
+2. **AWS CLI configured** with profiles for each account
+3. **Terraform >= 1.9.0** installed
+4. **S3 buckets** for state storage in each account
 
 ### Step 1: Clone and Setup
 
@@ -80,17 +95,20 @@ backend "s3" {
 }
 ```
 
-### Step 3: Deploy Infrastructure
+### Step 3: Deploy Multi-Account Infrastructure
 
 ```bash
-# Initialize Terraform
-terraform init
+# Option 1: Automated deployment
+./deploy-production.sh
 
-# Plan deployment
-terraform plan
+# Option 2: Manual account-by-account
+make deploy-devops      # Deploy DevOps account first
+make deploy-production  # Deploy Production account
+make deploy-development # Deploy Development account
 
-# Apply changes
-terraform apply
+# Option 3: Individual account deployment
+terraform workspace new devops
+terraform apply -var-file="environments/accounts/devops.tfvars"
 ```
 
 ### Step 4: Access Your Resources
