@@ -101,11 +101,15 @@ Single AWS Account (123456789012)
 3. **Terraform >= 1.9.0** installed
 4. **S3 bucket** for state storage
 
-### Step 1: Clone and Setup
+### Step 1: Choose Your Setup Method
 
+**🌟 New to AWS/Terraform? Start Here:**
+- **[Complete From-Scratch Setup Guide](FROM-SCRATCH-SETUP.md)** - Includes CloudShell setup and resource deployment sequence
+
+**Quick Setup (Experienced Users):**
 ```bash
-git clone <your-repo>
-cd Terraform-Demo
+git clone https://github.com/elngovind/terraform-project.git
+cd terraform-project
 
 # Copy example variables
 cp terraform.tfvars.example terraform.tfvars
