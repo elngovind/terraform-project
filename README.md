@@ -1,63 +1,52 @@
 # Terraform AWS Infrastructure Project
 
-This project creates a complete AWS infrastructure using Terraform with the following components:
-
-## Architecture Overview
-
-### 🏗️ Infrastructure Components
-
-1. **Network Blueprint**
-   - VPC with DNS support
-   - 6 Subnets across 2 AZs:
-     - 2 Public subnets (Web tier)
-     - 2 Private subnets (App tier)
-     - 2 Private subnets (Database tier)
-   - Internet Gateway
-   - NAT Gateway (configurable)
-   - Route tables and associations
-
-2. **Load Balancer**
-   - Application Load Balancer (ALB)
-   - Target groups with health checks
-   - HTTP/HTTPS listeners (HTTPS if ACM enabled)
-
-3. **ACM Certificate (Optional)**
-   - SSL/TLS certificate for HTTPS
-   - DNS validation support
-   - Route53 integration (optional)
-
-4. **Compute Resources**
-   - Auto Scaling Group (ASG)
-   - Launch Template with user data
-   - CloudWatch alarms for scaling
-   - EC2 instances with PowerUser IAM role
-
-5. **Database**
-   - RDS MySQL instance in private subnets
-   - Encrypted storage
-   - Automated backups
-   - Secrets Manager integration
-   - Enhanced monitoring
-
-6. **Jenkins Server**
-   - EC2 instance with Jenkins, Docker, Terraform
-   - Elastic IP for consistent access
-   - Pre-configured with CI/CD tools
-   - CloudWatch logging
+This project creates a **production-ready multi-account AWS infrastructure** using Terraform with enterprise-grade security and scalability.
 
 ## 🏭 Production Architecture
 
 ### Multi-Account Strategy
 
 **Account Structure:**
-- **Production Account**: Application workloads (VPC: 10.0.0.0/16)
-- **DevOps Account**: CI/CD tools, Jenkins (VPC: 10.100.0.0/16)
-- **Development Account**: Development environment (VPC: 10.10.0.0/16)
+```
+Production Account (10.0.0.0/16)
+├── Web Tier: 10.0.1.0/24, 10.0.2.0/24
+├── App Tier: 10.0.11.0/24, 10.0.12.0/24
+└── DB Tier: 10.0.21.0/24, 10.0.22.0/24
 
-**Security:**
+DevOps Account (10.100.0.0/16)
+├── Jenkins: 10.100.1.0/24, 10.100.2.0/24
+├── Tools: 10.100.11.0/24, 10.100.12.0/24
+└── Monitoring: 10.100.21.0/24, 10.100.22.0/24
+
+Development Account (10.10.0.0/16)
+├── Dev Web: 10.10.1.0/24, 10.10.2.0/24
+├── Dev App: 10.10.11.0/24, 10.10.12.0/24
+└── Dev DB: 10.10.21.0/24, 10.10.22.0/24
+```
+
+**Security Model:**
 - Cross-account IAM roles for deployment
-- Separate VPCs with controlled access
+- Network isolation with separate VPCs
 - Jenkins in DevOps account deploys to Production
+- Least privilege access principles
+
+### 🏗️ Infrastructure Components
+
+**Per Account:**
+1. **Dedicated VPC** with DNS support and custom CIDR
+2. **6 Subnets** across 2 AZs (Web, App, Database tiers)
+3. **Application Load Balancer** with health checks
+4. **Auto Scaling Group** with CloudWatch alarms
+5. **RDS MySQL** with encryption and Secrets Manager
+6. **Security Groups** with restrictive rules
+7. **IAM Roles** with least privilege access
+
+**DevOps Account Only:**
+- **Jenkins Server** with CI/CD tools (Docker, Terraform, kubectl)
+- **Cross-account deployment roles**
+- **Monitoring and logging infrastructure**
+
+
 
 ## 🚀 Quick Start
 
@@ -95,10 +84,24 @@ backend "s3" {
 }
 ```
 
-### Step 3: Deploy Multi-Account Infrastructure
+### Step 3: Configure AWS Profiles
 
 ```bash
-# Option 1: Automated deployment
+# Configure AWS profiles for each account
+aws configure --profile devops
+aws configure --profile production  
+aws configure --profile development
+
+# Verify access
+aws sts get-caller-identity --profile devops
+aws sts get-caller-identity --profile production
+aws sts get-caller-identity --profile development
+```
+
+### Step 4: Deploy Multi-Account Infrastructure
+
+```bash
+# Option 1: Automated deployment (Recommended)
 ./deploy-production.sh
 
 # Option 2: Manual account-by-account
@@ -121,13 +124,26 @@ After deployment, Terraform will output:
 
 ## 🔧 Configuration Options
 
+### Account-Specific Deployments
+
+```bash
+# DevOps Account (Jenkins, CI/CD tools)
+terraform apply -var-file="environments/accounts/devops.tfvars"
+
+# Production Account (Application workloads)
+terraform apply -var-file="environments/accounts/production.tfvars"
+
+# Development Account (Development environment)
+terraform apply -var-file="environments/accounts/development.tfvars"
+```
+
 ### Environment-Specific Deployments
 
 ```bash
-# Development
+# Development environment
 terraform apply -var-file="environments/dev.tfvars"
 
-# Production
+# Production environment
 terraform apply -var-file="environments/prod.tfvars"
 ```
 
@@ -142,9 +158,6 @@ make deploy-region REGION=eu-west-1
 
 # Deploy to AP Southeast 1
 make deploy-region REGION=ap-southeast-1
-
-# Manual deployment to any region
-terraform apply -var-file="environments/regions/REGION.tfvars"
 ```
 
 ### Enable HTTPS with ACM
@@ -157,8 +170,14 @@ terraform apply -var-file="environments/regions/REGION.tfvars"
 
 | Variable | Description | Default |
 |----------|-------------|---------|
+| `account_type` | Account type (production/devops/development) | `development` |
 | `aws_region` | AWS region | `us-east-1` |
 | `vpc_cidr` | VPC CIDR block | `10.0.0.0/16` |
+| `web_subnet_cidrs` | Web tier subnet CIDRs | `["10.0.1.0/24", "10.0.2.0/24"]` |
+| `app_subnet_cidrs` | App tier subnet CIDRs | `["10.0.11.0/24", "10.0.12.0/24"]` |
+| `db_subnet_cidrs` | Database tier subnet CIDRs | `["10.0.21.0/24", "10.0.22.0/24"]` |
+| `deploy_jenkins` | Deploy Jenkins server | `false` |
+| `devops_account_id` | DevOps account ID for cross-account access | `""` |
 | `enable_acm` | Enable SSL certificate | `false` |
 | `instance_type` | EC2 instance type | `t3.micro` |
 | `db_instance_class` | RDS instance class | `db.t3.micro` |
@@ -199,39 +218,79 @@ This project works in all major AWS regions:
 ├── variables.tf            # Global variables
 ├── modules.tf             # Module orchestration
 ├── outputs.tf             # Output definitions
+├── regions.tf             # Region validation
+├── deploy-production.sh   # Multi-account deployment
 ├── terraform.tfvars.example
 ├── environments/
-│   ├── dev.tfvars         # Development config
-│   └── prod.tfvars        # Production config
+│   ├── accounts/          # Account-specific configs
+│   │   ├── production.tfvars  # Production account
+│   │   ├── devops.tfvars      # DevOps account
+│   │   └── development.tfvars # Development account
+│   ├── regions/           # Region-specific configs
+│   │   ├── us-west-2.tfvars
+│   │   ├── eu-west-1.tfvars
+│   │   └── ap-southeast-1.tfvars
+│   ├── dev.tfvars         # Development environment
+│   └── prod.tfvars        # Production environment
 └── modules/
     ├── networking/        # VPC, subnets, routing
     ├── security/          # Security groups, IAM
     ├── compute/           # ALB, ASG, Launch Template
     ├── database/          # RDS configuration
     ├── jenkins/           # Jenkins server setup
-    └── acm/              # SSL certificate management
+    ├── acm/              # SSL certificate management
+    └── cross-account/     # Cross-account IAM roles
 ```
 
 ## 🔐 Security Best Practices
 
-1. **IAM Roles**: Least privilege access
-2. **Security Groups**: Restrictive ingress rules
-3. **Encryption**: EBS and RDS encryption enabled
-4. **Secrets Management**: Database credentials in Secrets Manager
-5. **Private Subnets**: Database and app tiers isolated
-6. **VPC Flow Logs**: Network monitoring (can be added)
+### Multi-Account Security
+1. **Account Isolation**: Separate AWS accounts for blast radius containment
+2. **Cross-Account Roles**: Secure deployment access with external ID
+3. **Network Segmentation**: Isolated VPCs per account with custom CIDRs
+4. **Least Privilege**: Account-specific IAM policies and roles
+
+### Infrastructure Security
+5. **Security Groups**: Restrictive ingress rules per tier
+6. **Encryption**: EBS and RDS encryption enabled by default
+7. **Secrets Management**: Database credentials in AWS Secrets Manager
+8. **Private Subnets**: Database and app tiers isolated from internet
+9. **Conditional Resources**: Jenkins only deployed in DevOps account
+10. **VPC Flow Logs**: Network monitoring and audit trails
 
 ## 🚀 Jenkins Pipeline Integration
 
-The Jenkins server comes pre-configured with:
+### DevOps Account Jenkins Server
+
+The Jenkins server (deployed only in DevOps account) comes pre-configured with:
 - **Terraform**: Infrastructure as Code
-- **Docker**: Containerization
-- **AWS CLI**: AWS service interaction
+- **Docker**: Containerization  
+- **AWS CLI**: Multi-account AWS service interaction
 - **kubectl**: Kubernetes management
+- **Cross-Account Roles**: Deploy to Production from DevOps account
 
-### Sample Pipeline
+### Multi-Account CI/CD Pipeline
 
-Check `/var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy` on the Jenkins server for a complete Terraform pipeline example.
+```groovy
+pipeline {
+    agent any
+    stages {
+        stage('Deploy to Development') {
+            steps {
+                sh 'aws sts assume-role --role-arn arn:aws:iam::DEV_ACCOUNT:role/deployment'
+                sh 'terraform apply -var-file=environments/accounts/development.tfvars'
+            }
+        }
+        stage('Deploy to Production') {
+            when { branch 'main' }
+            steps {
+                sh 'aws sts assume-role --role-arn arn:aws:iam::PROD_ACCOUNT:role/deployment'
+                sh 'terraform apply -var-file=environments/accounts/production.tfvars'
+            }
+        }
+    }
+}
+```
 
 ## 🔍 Monitoring & Logging
 
@@ -242,16 +301,33 @@ Check `/var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy` on the Jenk
 
 ## 🛠️ Troubleshooting
 
+### Multi-Account Issues
+
+1. **AWS Profiles**: Ensure profiles are configured for each account
+2. **Cross-Account Access**: Verify IAM roles and trust relationships
+3. **State Buckets**: Separate S3 buckets required for each account
+4. **VPC CIDR Conflicts**: Ensure non-overlapping CIDR blocks
+5. **Workspace Management**: Use correct Terraform workspace per account
+
 ### Common Issues
 
-1. **State Bucket**: Ensure S3 bucket exists and is accessible
-2. **Permissions**: Verify AWS credentials have required permissions
-3. **Terraform Version**: Ensure version >= 1.9.0 for S3 native locking
-4. **Domain Validation**: Manually validate ACM certificate if Route53 not used
+6. **Account Permissions**: Verify account-specific IAM permissions
+7. **Terraform Version**: Ensure version >= 1.9.0 for S3 native locking
+8. **Domain Validation**: Manually validate ACM certificate if Route53 not used
+9. **Jenkins Access**: Ensure Jenkins is only deployed in DevOps account
 
 ### Useful Commands
 
 ```bash
+# Multi-account workspace management
+terraform workspace list
+terraform workspace select devops
+terraform workspace new production
+
+# Account-specific operations
+terraform plan -var-file="environments/accounts/devops.tfvars"
+terraform apply -var-file="environments/accounts/production.tfvars"
+
 # Check Terraform version
 terraform version
 
@@ -264,8 +340,8 @@ terraform fmt -recursive
 # Show current state
 terraform show
 
-# Destroy infrastructure
-terraform destroy
+# Destroy account-specific infrastructure
+terraform destroy -var-file="environments/accounts/development.tfvars"
 ```
 
 ## 📚 Learning Resources
@@ -273,8 +349,9 @@ terraform destroy
 This project demonstrates Terraform concepts from basic to advanced:
 
 1. **Beginners**: Start with `variables.tf` and `main.tf`
-2. **Intermediate**: Explore module structure and relationships
-3. **Advanced**: Study dynamic blocks, conditionals, and state management
+2. **Intermediate**: Explore module structure and account-specific configurations
+3. **Advanced**: Study multi-account architecture, cross-account roles, and conditional deployments
+4. **Enterprise**: Learn workspace management, state isolation, and production deployment patterns
 
 ## 🤝 Contributing
 
@@ -293,5 +370,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **Note**: Remember to destroy resources when not needed to avoid unnecessary AWS charges:
 
 ```bash
-terraform destroy
+# Destroy specific account infrastructure
+terraform workspace select devops
+terraform destroy -var-file="environments/accounts/devops.tfvars"
+
+# Destroy all accounts (use with caution)
+./deploy-production.sh --destroy
 ```
+
+**⚠️ Production Warning**: Always destroy development and DevOps accounts before production to avoid dependency issues.
