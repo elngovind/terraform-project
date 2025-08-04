@@ -27,7 +27,7 @@ resource "aws_instance" "jenkins" {
   vpc_security_group_ids = [var.jenkins_security_group_id]
   iam_instance_profile   = var.ec2_instance_profile_name
 
-  user_data = base64encode(templatefile("${path.module}/jenkins_user_data.sh", {
+  user_data = base64encode(templatefile("${path.module}/jenkins_user_data.sh.tpl", {
     project_name = var.project_name
     environment  = var.environment
   }))

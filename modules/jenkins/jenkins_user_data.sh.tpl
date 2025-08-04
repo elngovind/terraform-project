@@ -41,7 +41,7 @@ wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/a
 rpm -U ./amazon-cloudwatch-agent.rpm
 
 # Configure CloudWatch agent
-cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWEOF'
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOF'
 {
     "logs": {
         "logs_collected": {
@@ -57,7 +57,7 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWEO
         }
     }
 }
-CWEOF
+EOF
 
 # Start CloudWatch agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
@@ -70,7 +70,7 @@ systemctl enable jenkins
 sleep 60
 
 # Create Jenkins info script
-cat > /home/ec2-user/jenkins-info.sh << 'INFOEOF'
+cat > /home/ec2-user/jenkins-info.sh << 'EOF'
 #!/bin/bash
 echo "==================================="
 echo "Jenkins Server Information"
@@ -87,65 +87,12 @@ echo "- Terraform: $(terraform version | head -n 1)"
 echo "- AWS CLI: $(aws --version)"
 echo "- kubectl: kubectl installed"
 echo "==================================="
-INFOEOF
+EOF
 
 chmod +x /home/ec2-user/jenkins-info.sh
 chown ec2-user:ec2-user /home/ec2-user/jenkins-info.sh
 
 # Run the info script
 /home/ec2-user/jenkins-info.sh > /home/ec2-user/jenkins-setup-info.txt
-
-# Create Jenkins pipeline examples directory
-mkdir -p /var/lib/jenkins/pipeline-examples
-chown jenkins:jenkins /var/lib/jenkins/pipeline-examples
-
-# Create a sample Terraform pipeline
-cat > /var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy << 'PIPEEOF'
-pipeline {
-    agent any
-    
-    environment {
-        AWS_DEFAULT_REGION = 'us-east-1'
-        TF_VAR_environment = "${env.BRANCH_NAME == 'main' ? 'prod' : 'dev'}"
-    }
-    
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        
-        stage('Terraform Init') {
-            steps {
-                sh 'terraform init'
-            }
-        }
-        
-        stage('Terraform Plan') {
-            steps {
-                sh 'terraform plan -out=tfplan'
-            }
-        }
-        
-        stage('Terraform Apply') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh 'terraform apply -auto-approve tfplan'
-            }
-        }
-    }
-    
-    post {
-        always {
-            cleanWs()
-        }
-    }
-}
-PIPEEOF
-
-chown jenkins:jenkins /var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy
 
 echo "Jenkins installation completed!" >> /var/log/jenkins-install.log
