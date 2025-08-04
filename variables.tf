@@ -2,7 +2,7 @@
 variable "aws_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-south-1"
 }
 
 variable "project_name" {
@@ -30,8 +30,8 @@ variable "account_type" {
   default     = "development"
   
   validation {
-    condition     = contains(["production", "devops", "development"], var.account_type)
-    error_message = "Account type must be production, devops, or development."
+    condition     = contains(["production", "devops", "development", "single-account"], var.account_type)
+    error_message = "Account type must be production, devops, development, or single-account."
   }
 }
 
