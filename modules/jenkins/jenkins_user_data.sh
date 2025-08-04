@@ -81,11 +81,11 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 echo "==================================="
 echo "Installed Tools:"
 echo "- Java: \$(java -version 2>&1 | head -n 1)"
-echo "- Jenkins: \$(jenkins --version 2>/dev/null || echo 'Jenkins installed')"
+echo "- Jenkins: \$(jenkins --version 2>/dev/null || echo \"Jenkins installed\")"
 echo "- Docker: \$(docker --version)"
 echo "- Terraform: \$(terraform version | head -n 1)"
 echo "- AWS CLI: \$(aws --version)"
-echo "- kubectl: \$(kubectl version --client --short 2>/dev/null)"
+echo "- kubectl: \$(kubectl version --client --short 2>/dev/null || echo \"kubectl installed\")"
 echo "==================================="
 EOF
 
@@ -106,7 +106,7 @@ pipeline {
     
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        TF_VAR_environment = "${env.BRANCH_NAME == 'main' ? 'prod' : 'dev'}"
+        TF_VAR_environment = "\${env.BRANCH_NAME == \"main\" ? \"prod\" : \"dev\"}"
     }
     
     stages {
@@ -130,7 +130,7 @@ pipeline {
         
         stage('Terraform Apply') {
             when {
-                branch 'main'
+                branch \"main\"
             }
             steps {
                 sh 'terraform apply -auto-approve tfplan'
