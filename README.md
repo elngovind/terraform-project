@@ -87,6 +87,45 @@ Single AWS Account (123456789012)
 
 ## 🚀 Quick Start
 
+### Installation
+
+#### Install Terraform on Ubuntu/Debian
+```bash
+# Add HashiCorp GPG key
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+# Add HashiCorp repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+# Update and install Terraform
+sudo apt update && sudo apt install terraform
+
+# Verify installation
+terraform version
+```
+
+#### Install Terraform on macOS
+```bash
+# Using Homebrew
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+
+# Verify installation
+terraform version
+```
+
+#### Install Terraform on Windows
+```powershell
+# Using Chocolatey
+choco install terraform
+
+# Using Scoop
+scoop install terraform
+
+# Verify installation
+terraform version
+```
+
 ### Prerequisites
 
 **For Multi-Account Deployment:**
