@@ -31,7 +31,7 @@ yum install -y unzip
 unzip awscliv2.zip
 ./aws/install
 
-# Install kubectl (region-agnostic)
+# Install kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x kubectl
 mv kubectl /usr/local/bin/
@@ -41,7 +41,7 @@ wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/a
 rpm -U ./amazon-cloudwatch-agent.rpm
 
 # Configure CloudWatch agent
-cat <<EOF > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWEOF'
 {
     "logs": {
         "logs_collected": {
@@ -57,7 +57,7 @@ cat <<EOF > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
         }
     }
 }
-EOF
+CWEOF
 
 # Start CloudWatch agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
@@ -66,28 +66,28 @@ EOF
 systemctl start jenkins
 systemctl enable jenkins
 
-# Wait for Jenkins to start and get initial admin password
+# Wait for Jenkins to start
 sleep 60
 
-# Create a simple script to display Jenkins info
-cat <<EOF > /home/ec2-user/jenkins-info.sh
+# Create Jenkins info script
+cat > /home/ec2-user/jenkins-info.sh << 'INFOEOF'
 #!/bin/bash
 echo "==================================="
 echo "Jenkins Server Information"
 echo "==================================="
-echo "Jenkins URL: http://\$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8080"
+echo "Jenkins URL: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8080"
 echo "Initial Admin Password:"
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 echo "==================================="
 echo "Installed Tools:"
-echo "- Java: \$(java -version 2>&1 | head -n 1)"
-echo "- Jenkins: \$(jenkins --version 2>/dev/null || echo \"Jenkins installed\")"
-echo "- Docker: \$(docker --version)"
-echo "- Terraform: \$(terraform version | head -n 1)"
-echo "- AWS CLI: \$(aws --version)"
-echo "- kubectl: \$(kubectl version --client --short 2>/dev/null || echo \"kubectl installed\")"
+echo "- Java: $(java -version 2>&1 | head -n 1)"
+echo "- Jenkins: Jenkins installed"
+echo "- Docker: $(docker --version)"
+echo "- Terraform: $(terraform version | head -n 1)"
+echo "- AWS CLI: $(aws --version)"
+echo "- kubectl: kubectl installed"
 echo "==================================="
-EOF
+INFOEOF
 
 chmod +x /home/ec2-user/jenkins-info.sh
 chown ec2-user:ec2-user /home/ec2-user/jenkins-info.sh
@@ -100,13 +100,13 @@ mkdir -p /var/lib/jenkins/pipeline-examples
 chown jenkins:jenkins /var/lib/jenkins/pipeline-examples
 
 # Create a sample Terraform pipeline
-cat <<'EOF' > /var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy
+cat > /var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy << 'PIPEEOF'
 pipeline {
     agent any
     
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        TF_VAR_environment = "\${env.BRANCH_NAME == \"main\" ? \"prod\" : \"dev\"}"
+        TF_VAR_environment = "${env.BRANCH_NAME == 'main' ? 'prod' : 'dev'}"
     }
     
     stages {
@@ -130,7 +130,7 @@ pipeline {
         
         stage('Terraform Apply') {
             when {
-                branch \"main\"
+                branch 'main'
             }
             steps {
                 sh 'terraform apply -auto-approve tfplan'
@@ -144,7 +144,7 @@ pipeline {
         }
     }
 }
-EOF
+PIPEEOF
 
 chown jenkins:jenkins /var/lib/jenkins/pipeline-examples/terraform-pipeline.groovy
 
