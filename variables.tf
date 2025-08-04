@@ -106,11 +106,7 @@ variable "deploy_devops_vpc" {
   default     = false
 }
 
-variable "devops_vpc_cidr" {
-  description = "DevOps VPC CIDR for single-account deployment"
-  type        = string
-  default     = "10.100.0.0/16"
-}
+
 
 variable "devops_web_subnet_cidrs" {
   description = "CIDR blocks for DevOps web subnets"
