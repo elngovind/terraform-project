@@ -63,7 +63,7 @@ aws s3api put-bucket-versioning --bucket terraform-state-development-$(date +%s)
 
 ## Step 3: Update Account Configurations
 
-### DevOps Account (`environments/accounts/devops.tfvars`)
+### DevOps Account (`terraform-configs/accounts/devops.tfvars`)
 ```hcl
 account_type = "devops"
 account_id   = "987654321098"  # Your DevOps account ID
@@ -72,7 +72,7 @@ deploy_jenkins = true
 production_account_id = "123456789012"
 ```
 
-### Production Account (`environments/accounts/production.tfvars`)
+### Production Account (`terraform-configs/accounts/production.tfvars`)
 ```hcl
 account_type = "production"
 account_id   = "123456789012"  # Your Production account ID
@@ -81,7 +81,7 @@ deploy_jenkins = false
 devops_account_id = "987654321098"
 ```
 
-### Development Account (`environments/accounts/development.tfvars`)
+### Development Account (`terraform-configs/accounts/development.tfvars`)
 ```hcl
 account_type = "development"
 account_id   = "456789012345"  # Your Development account ID
@@ -103,19 +103,19 @@ devops_account_id = "987654321098"
 export AWS_PROFILE=devops
 terraform workspace new devops
 terraform init
-terraform apply -var-file="environments/accounts/devops.tfvars"
+terraform apply -var-file="terraform-configs/accounts/devops.tfvars"
 
 # 2. Deploy Production Account (Application workloads)
 export AWS_PROFILE=production
 terraform workspace new production
 terraform init
-terraform apply -var-file="environments/accounts/production.tfvars"
+terraform apply -var-file="terraform-configs/accounts/production.tfvars"
 
 # 3. Deploy Development Account (Development environment)
 export AWS_PROFILE=development
 terraform workspace new development
 terraform init
-terraform apply -var-file="environments/accounts/development.tfvars"
+terraform apply -var-file="terraform-configs/accounts/development.tfvars"
 ```
 
 ### Option 3: Using Makefile
@@ -161,13 +161,13 @@ terraform output
 ```bash
 # Destroy in reverse order
 export AWS_PROFILE=development
-terraform destroy -var-file="environments/accounts/development.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/development.tfvars"
 
 export AWS_PROFILE=production
-terraform destroy -var-file="environments/accounts/production.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/production.tfvars"
 
 export AWS_PROFILE=devops
-terraform destroy -var-file="environments/accounts/devops.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/devops.tfvars"
 ```
 
 ## Troubleshooting

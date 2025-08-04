@@ -33,7 +33,7 @@ mkdir terraform-aws-infrastructure
 cd terraform-aws-infrastructure
 
 # Create directory structure
-mkdir -p {modules/{networking,security,compute,database,jenkins,acm},environments/regions}
+mkdir -p {modules/{networking,security,compute,database,jenkins,acm},terraform-configs/regions}
 
 # Create main files
 touch main.tf variables.tf outputs.tf modules.tf versions.tf regions.tf
@@ -49,8 +49,8 @@ done
 touch modules/compute/user_data.sh modules/jenkins/jenkins_user_data.sh
 
 # Create environment files
-touch environments/{dev.tfvars,prod.tfvars}
-touch environments/regions/{us-west-2.tfvars,eu-west-1.tfvars,ap-southeast-1.tfvars}
+touch terraform-configs/{dev.tfvars,prod.tfvars}
+touch terraform-configs/regions/{us-west-2.tfvars,eu-west-1.tfvars,ap-southeast-1.tfvars}
 ```
 
 ## Step 2: Configure Terraform Backend
@@ -244,9 +244,9 @@ vim terraform.tfvars
 
 ### 5.2 Configure Environment Files
 ```bash
-# Edit environments/dev.tfvars
-# Edit environments/prod.tfvars
-# Edit environments/regions/*.tfvars
+# Edit terraform-configs/dev.tfvars
+# Edit terraform-configs/prod.tfvars
+# Edit terraform-configs/regions/*.tfvars
 ```
 
 ## Step 6: Testing and Validation
@@ -358,7 +358,7 @@ aws ec2 describe-availability-zones --region eu-west-1
 ### 10.1 Destroy Resources
 ```bash
 # Destroy specific environment
-terraform destroy -var-file="environments/dev.tfvars"
+terraform destroy -var-file="terraform-configs/dev.tfvars"
 
 # Destroy specific region
 make destroy-region REGION=us-west-2

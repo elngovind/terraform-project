@@ -40,7 +40,7 @@ ls -la
 **For Single-Account (Recommended for first-time):**
 ```bash
 # Use single-account setup
-cp environments/accounts/single-account.tfvars terraform.tfvars
+cp terraform-configs/accounts/single-account.tfvars terraform.tfvars
 
 # Edit configuration
 vim terraform.tfvars
@@ -49,9 +49,9 @@ vim terraform.tfvars
 **For Multi-Account (Advanced):**
 ```bash
 # Choose account type
-cp environments/accounts/devops.tfvars terraform.tfvars
+cp terraform-configs/accounts/devops.tfvars terraform.tfvars
 # OR
-cp environments/accounts/production.tfvars terraform.tfvars
+cp terraform-configs/accounts/production.tfvars terraform.tfvars
 ```
 
 ## Option 2: Local Machine Setup
@@ -268,11 +268,11 @@ terraform apply
 make deploy-single-account
 
 # Manual deployment
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 
 # Step-by-step deployment
-terraform plan -var-file="environments/accounts/single-account.tfvars"
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform plan -var-file="terraform-configs/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 ```
 
 ### Multi-Account Deployment
@@ -283,11 +283,11 @@ terraform apply -var-file="environments/accounts/single-account.tfvars"
 # Manual account-by-account
 export AWS_PROFILE=devops
 terraform workspace new devops
-terraform apply -var-file="environments/accounts/devops.tfvars"
+terraform apply -var-file="terraform-configs/accounts/devops.tfvars"
 
 export AWS_PROFILE=production
 terraform workspace new production
-terraform apply -var-file="environments/accounts/production.tfvars"
+terraform apply -var-file="terraform-configs/accounts/production.tfvars"
 ```
 
 ## Verification Steps

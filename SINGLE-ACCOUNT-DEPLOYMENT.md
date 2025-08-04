@@ -67,7 +67,7 @@ backend "s3" {
 
 ## Step 4: Configure Single-Account Variables
 
-Update `environments/accounts/single-account.tfvars`:
+Update `terraform-configs/accounts/single-account.tfvars`:
 
 ```hcl
 # Single Account Configuration
@@ -113,7 +113,7 @@ make deploy-single-account
 terraform init
 
 # Plan deployment
-terraform plan -var-file="environments/accounts/single-account.tfvars" -out=tfplan
+terraform plan -var-file="terraform-configs/accounts/single-account.tfvars" -out=tfplan
 
 # Apply deployment
 terraform apply tfplan
@@ -125,13 +125,13 @@ terraform apply tfplan
 terraform validate
 
 # Plan with target (deploy networking first)
-terraform plan -var-file="environments/accounts/single-account.tfvars" -target=module.networking -target=module.devops_vpc
+terraform plan -var-file="terraform-configs/accounts/single-account.tfvars" -target=module.networking -target=module.devops_vpc
 
 # Apply networking
-terraform apply -var-file="environments/accounts/single-account.tfvars" -target=module.networking -target=module.devops_vpc
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars" -target=module.networking -target=module.devops_vpc
 
 # Deploy remaining infrastructure
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 ```
 
 ## Step 6: Verify Deployment
@@ -181,7 +181,7 @@ curl -I http://$(terraform output -raw jenkins_url)
 
 ```bash
 # Destroy infrastructure
-terraform destroy -var-file="environments/accounts/single-account.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/single-account.tfvars"
 
 # Delete state bucket (optional)
 aws s3 rb s3://$BUCKET_NAME --force

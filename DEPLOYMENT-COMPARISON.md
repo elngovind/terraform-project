@@ -82,7 +82,7 @@ make deploy-development
 make deploy-single-account
 
 # Manual
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 ```
 
 ## Security Comparison
@@ -148,8 +148,8 @@ You can also use a **hybrid approach**:
 
 ```bash
 # Deploy production to separate account
-terraform apply -var-file="environments/accounts/production.tfvars"
+terraform apply -var-file="terraform-configs/accounts/production.tfvars"
 
 # Deploy dev/staging to single account with separate VPCs
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 ```

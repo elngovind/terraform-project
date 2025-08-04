@@ -34,18 +34,18 @@
 ```bash
 # Deploy DevOps infrastructure first
 terraform workspace new devops
-terraform apply -var-file="environments/accounts/devops.tfvars"
+terraform apply -var-file="terraform-configs/accounts/devops.tfvars"
 ```
 
 ### 2. Production Account Setup
 ```bash
 # Deploy Production infrastructure
 terraform workspace new production
-terraform apply -var-file="environments/accounts/production.tfvars"
+terraform apply -var-file="terraform-configs/accounts/production.tfvars"
 ```
 
 ### 3. Cross-Account Connectivity
 ```bash
 # Setup VPC peering and cross-account roles
-terraform apply -var-file="environments/accounts/cross-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/cross-account.tfvars"
 ```
