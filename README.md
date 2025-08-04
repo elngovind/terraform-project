@@ -565,6 +565,135 @@ pipeline {
 
 ## 🛠️ Troubleshooting Guide
 
+### EC2 Instance Disconnection After Terraform Apply
+
+**Problem**: Your EC2 instance gets signed out or becomes inaccessible after running `terraform apply`.
+
+**Why This Happens:**
+- **Instance Replacement**: Terraform replaced your instance due to configuration changes
+- **New VPC/Subnets**: Infrastructure changes caused new network setup
+- **Security Group Changes**: New security groups were applied
+- **IP Address Changes**: New public/private IP addresses assigned
+
+**Immediate Solutions:**
+
+#### **1. Check Terraform Outputs**
+```bash
+# Get all current resource information
+terraform output
+
+# Get specific outputs
+terraform output jenkins_public_ip
+terraform output jenkins_ssh_command
+terraform output jenkins_url
+terraform output alb_dns_name
+```
+
+#### **2. Connect to New Instance**
+```bash
+# Use the SSH command from terraform output
+ssh -i your-key.pem ec2-user@NEW_PUBLIC_IP
+
+# Or use the generated SSH command
+terraform output jenkins_ssh_command
+```
+
+#### **3. Check AWS Console**
+- Go to **EC2 Dashboard**
+- Look for instances with tags: `Project = myapp`, `Environment = single-account`
+- Note the new public IP addresses
+- Check instance state and security groups
+
+#### **4. Verify Infrastructure Status**
+```bash
+# Check current infrastructure
+terraform show
+
+# Verify state
+terraform state list
+
+# Get specific resource details
+terraform state show module.jenkins[0].aws_instance.jenkins
+```
+
+**Prevention Strategies:**
+
+#### **1. Use Terraform Workspaces**
+```bash
+# Create workspace for testing
+terraform workspace new test
+terraform workspace select test
+
+# Apply changes in test workspace first
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
+
+# Switch back to default workspace
+terraform workspace select default
+```
+
+#### **2. Always Plan Before Apply**
+```bash
+# Check what will change before applying
+terraform plan -var-file="terraform-configs/accounts/single-account.tfvars"
+
+# Look for instance replacements (- and + symbols)
+# Review security group and network changes
+```
+
+#### **3. Use Lifecycle Rules (Advanced)**
+Add to your instance configuration to prevent accidental destruction:
+```hcl
+resource "aws_instance" "jenkins" {
+  # ... other configuration
+  
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [
+      ami,  # Ignore AMI changes
+      user_data,  # Ignore user data changes
+    ]
+  }
+}
+```
+
+#### **4. Backup Important Data**
+```bash
+# Before major changes, backup Jenkins data
+sudo tar -czf jenkins-backup.tar.gz /var/lib/jenkins/
+
+# Backup application data
+sudo cp -r /var/www/html/ ~/html-backup/
+```
+
+**Quick Recovery Checklist:**
+
+- [ ] Run `terraform output` to get new connection details
+- [ ] Update your SSH connection with new IP address
+- [ ] Verify Jenkins is running: `sudo systemctl status jenkins`
+- [ ] Check application load balancer health
+- [ ] Test database connectivity
+- [ ] Verify security group rules
+- [ ] Update any hardcoded IP addresses in your applications
+
+**Common Post-Apply Tasks:**
+```bash
+# 1. Reconnect to Jenkins
+JENKINS_URL=$(terraform output -raw jenkins_url)
+echo "Jenkins available at: $JENKINS_URL"
+
+# 2. Get initial admin password
+ssh -i your-key.pem ec2-user@$(terraform output -raw jenkins_public_ip) \
+  "sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
+
+# 3. Test application
+ALB_URL=$(terraform output -raw alb_dns_name)
+curl -I http://$ALB_URL
+
+# 4. Check database connectivity
+DB_ENDPOINT=$(terraform output -raw rds_endpoint)
+echo "Database endpoint: $DB_ENDPOINT"
+```
+
 ### Multi-Account Deployment Issues
 
 | Issue | Symptoms | Solution |
