@@ -72,7 +72,8 @@ module "jenkins" {
   count  = var.deploy_jenkins ? 1 : 0
   source = "./modules/jenkins"
 
-  web_subnet_ids             = var.deploy_devops_vpc ? module.devops_vpc[0].devops_web_subnet_ids : module.networking.web_subnet_ids
+  web_subnet_ids             = module.networking.web_subnet_ids
+  devops_web_subnet_ids      = var.deploy_devops_vpc ? module.devops_vpc[0].devops_web_subnet_ids : module.networking.web_subnet_ids
   jenkins_security_group_id  = module.security.jenkins_security_group_id
   ec2_instance_profile_name  = module.security.ec2_instance_profile_name
   project_name               = var.project_name

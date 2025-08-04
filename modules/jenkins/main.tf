@@ -23,7 +23,7 @@ data "aws_ami" "amazon_linux" {
 resource "aws_instance" "jenkins" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.jenkins_instance_type
-  subnet_id              = var.web_subnet_ids[0]  # Deploy in first public subnet
+  subnet_id              = var.devops_web_subnet_ids[0]  # Deploy in DevOps VPC public subnet
   vpc_security_group_ids = [var.jenkins_security_group_id]
   iam_instance_profile   = var.ec2_instance_profile_name
 

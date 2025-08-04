@@ -3,6 +3,11 @@ variable "web_subnet_ids" {
   type        = list(string)
 }
 
+variable "devops_web_subnet_ids" {
+  description = "List of DevOps web subnet IDs"
+  type        = list(string)
+}
+
 variable "jenkins_security_group_id" {
   description = "Jenkins security group ID"
   type        = string

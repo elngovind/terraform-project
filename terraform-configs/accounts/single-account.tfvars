@@ -42,8 +42,8 @@ jenkins_instance_type = "t3.large"
 deploy_devops_vpc     = true  # Deploy separate DevOps VPC
 
 # Security Configuration
-enable_acm  = true
-domain_name = "myapp.com"
+enable_acm  = false
+domain_name = ""
 
 # VPC Peering between Production and DevOps VPCs
 enable_vpc_peering = true
