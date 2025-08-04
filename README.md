@@ -205,7 +205,7 @@ make deploy-devops && make deploy-production  # Manual step-by-step
 
 # Single-Account Deployment (Cost-Optimized)
 make deploy-single-account               # Automated single-account
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 ```
 
 ### Step 5: Access Your Resources
@@ -232,9 +232,9 @@ terraform output
 **Multi-Account Deployment (Maximum Security):**
 ```bash
 # Deploy to separate AWS accounts
-terraform apply -var-file="environments/accounts/devops.tfvars"      # DevOps Account
-terraform apply -var-file="environments/accounts/production.tfvars"  # Production Account
-terraform apply -var-file="environments/accounts/development.tfvars" # Development Account
+terraform apply -var-file="terraform-configs/accounts/devops.tfvars"      # DevOps Account
+terraform apply -var-file="terraform-configs/accounts/production.tfvars"  # Production Account
+terraform apply -var-file="terraform-configs/accounts/development.tfvars" # Development Account
 
 # Or use automated deployment
 ./deploy-production.sh
@@ -244,17 +244,17 @@ terraform apply -var-file="environments/accounts/development.tfvars" # Developme
 ```bash
 # Deploy separate VPCs in same account
 make deploy-single-account
-terraform apply -var-file="environments/accounts/single-account.tfvars"
+terraform apply -var-file="terraform-configs/accounts/single-account.tfvars"
 ```
 
 ### Environment-Specific Deployments
 
 ```bash
 # Development environment
-terraform apply -var-file="environments/dev.tfvars"
+terraform apply -var-file="terraform-configs/dev.tfvars"
 
 # Production environment
-terraform apply -var-file="environments/prod.tfvars"
+terraform apply -var-file="terraform-configs/prod.tfvars"
 ```
 
 ### Multi-Region Deployments
@@ -370,7 +370,7 @@ This project works in all major AWS regions:
 │   └── PRODUCTION-ARCHITECTURE.md   # Production architecture details
 │
 ├── ⚙️ Environment Configurations
-│   └── environments/
+│   └── terraform-configs/
 │       ├── accounts/              # Account-specific configurations
 │       │   ├── production.tfvars     # Production account settings
 │       │   ├── devops.tfvars         # DevOps account settings
@@ -464,7 +464,7 @@ pipeline {
                             --role-arn arn:aws:iam::456789012345:role/myapp-dev-cross-account-deployment \
                             --role-session-name jenkins-dev-deploy
                         terraform workspace select development
-                        terraform plan -var-file=environments/accounts/development.tfvars
+                        terraform plan -var-file=terraform-configs/accounts/development.tfvars
                     '''
                 }
             }
@@ -472,7 +472,7 @@ pipeline {
         
         stage('Deploy to Development') {
             steps {
-                sh 'terraform apply -var-file=environments/accounts/development.tfvars -auto-approve'
+                sh 'terraform apply -var-file=terraform-configs/accounts/development.tfvars -auto-approve'
             }
         }
         
@@ -485,7 +485,7 @@ pipeline {
                             --role-arn arn:aws:iam::123456789012:role/myapp-prod-cross-account-deployment \
                             --role-session-name jenkins-prod-deploy
                         terraform workspace select production
-                        terraform plan -var-file=environments/accounts/production.tfvars
+                        terraform plan -var-file=terraform-configs/accounts/production.tfvars
                     '''
                 }
             }
@@ -499,7 +499,7 @@ pipeline {
                 }
             }
             steps {
-                sh 'terraform apply -var-file=environments/accounts/production.tfvars -auto-approve'
+                sh 'terraform apply -var-file=terraform-configs/accounts/production.tfvars -auto-approve'
             }
         }
     }
@@ -533,8 +533,8 @@ pipeline {
             steps {
                 sh '''
                     terraform workspace select single-account || terraform workspace new single-account
-                    terraform plan -var-file=environments/accounts/single-account.tfvars
-                    terraform apply -var-file=environments/accounts/single-account.tfvars -auto-approve
+                    terraform plan -var-file=terraform-configs/accounts/single-account.tfvars
+                    terraform apply -var-file=terraform-configs/accounts/single-account.tfvars -auto-approve
                 '''
             }
         }
@@ -614,7 +614,7 @@ terraform workspace list
 terraform workspace show
 
 # Force refresh state
-terraform refresh -var-file="environments/accounts/production.tfvars"
+terraform refresh -var-file="terraform-configs/accounts/production.tfvars"
 
 # Import existing resources
 terraform import aws_vpc.main vpc-12345678
@@ -629,8 +629,8 @@ terraform workspace select devops
 terraform workspace new production
 
 # Account-specific operations
-terraform plan -var-file="environments/accounts/devops.tfvars"
-terraform apply -var-file="environments/accounts/production.tfvars"
+terraform plan -var-file="terraform-configs/accounts/devops.tfvars"
+terraform apply -var-file="terraform-configs/accounts/production.tfvars"
 
 # Check Terraform version
 terraform version
@@ -645,7 +645,7 @@ terraform fmt -recursive
 terraform show
 
 # Destroy account-specific infrastructure
-terraform destroy -var-file="environments/accounts/development.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/development.tfvars"
 ```
 
 ## 📚 Learning Path & Resources
@@ -668,7 +668,7 @@ terraform destroy -var-file="environments/accounts/development.tfvars"
 - **Focus**: Multi-account architecture, cross-account roles, state management
 - **Concepts**: Workspace management, remote state, security best practices
 - **Practice**: Deploy multi-account infrastructure with CI/CD
-- **Study**: `environments/accounts/` configurations and `deploy-production.sh`
+- **Study**: `terraform-configs/accounts/` configurations and `deploy-production.sh`
 
 #### **Enterprise Level (Week 7+)**
 - **Focus**: Production deployment patterns, monitoring, and governance
@@ -685,7 +685,7 @@ terraform destroy -var-file="environments/accounts/development.tfvars"
 | `modules/networking/` | VPC, subnets, routing concepts | Beginner |
 | `modules/security/` | IAM roles, security groups | Intermediate |
 | `modules/compute/` | Load balancers, auto scaling | Intermediate |
-| `environments/accounts/` | Multi-account patterns | Advanced |
+| `terraform-configs/accounts/` | Multi-account patterns | Advanced |
 | `deploy-production.sh` | Automation and orchestration | Advanced |
 | Jenkins pipelines | CI/CD integration | Enterprise |
 
@@ -726,23 +726,23 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 # 1. Destroy Development Account
 export AWS_PROFILE=development
 terraform workspace select development
-terraform destroy -var-file="environments/accounts/development.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/development.tfvars"
 
 # 2. Destroy Production Account
 export AWS_PROFILE=production
 terraform workspace select production
-terraform destroy -var-file="environments/accounts/production.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/production.tfvars"
 
 # 3. Destroy DevOps Account (Last)
 export AWS_PROFILE=devops
 terraform workspace select devops
-terraform destroy -var-file="environments/accounts/devops.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/devops.tfvars"
 ```
 
 **Single-Account Cleanup:**
 ```bash
 # Destroy all resources in single account
-terraform destroy -var-file="environments/accounts/single-account.tfvars"
+terraform destroy -var-file="terraform-configs/accounts/single-account.tfvars"
 
 # Or use Makefile
 make destroy-single-account
