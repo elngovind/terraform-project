@@ -65,7 +65,8 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
-    type = var.enable_acm ? "redirect" : "forward"
+    type             = var.enable_acm ? "redirect" : "forward"
+    target_group_arn = var.enable_acm ? null : aws_lb_target_group.main.arn
 
     dynamic "redirect" {
       for_each = var.enable_acm ? [1] : []
@@ -73,15 +74,6 @@ resource "aws_lb_listener" "http" {
         port        = "443"
         protocol    = "HTTPS"
         status_code = "HTTP_301"
-      }
-    }
-
-    dynamic "forward" {
-      for_each = var.enable_acm ? [] : [1]
-      content {
-        target_group {
-          arn = aws_lb_target_group.main.arn
-        }
       }
     }
   }

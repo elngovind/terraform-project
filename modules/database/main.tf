@@ -75,8 +75,8 @@ resource "aws_db_instance" "main" {
   skip_final_snapshot = true
   deletion_protection = false
 
-  # Performance Insights
-  performance_insights_enabled = true
+  # Performance Insights (disabled for t3.micro)
+  performance_insights_enabled = false
 
   tags = {
     Name = "${var.project_name}-${var.environment}-db"

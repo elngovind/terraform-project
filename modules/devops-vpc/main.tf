@@ -87,6 +87,37 @@ resource "aws_route_table_association" "devops_app" {
   route_table_id = aws_route_table.devops_private.id
 }
 
+# Jenkins Security Group for DevOps VPC
+resource "aws_security_group" "jenkins" {
+  name_prefix = "${var.project_name}-${var.environment}-devops-jenkins-"
+  vpc_id      = aws_vpc.devops.id
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-devops-jenkins-sg"
+  }
+}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
